@@ -22,14 +22,15 @@ G.add_edges_from([
     ("Queenstown", "Wanaka", {"weight": 117}),
 ])
 
-# Get all shortest paths from 'Christchurch'
-shortest_paths = nx.single_source_dijkstra_path(G, source='Christchurch')
-shortest_path_lengths = nx.single_source_dijkstra_path_length(G, source='Christchurch')
+# Calculate shortest paths and distances using Dijkstra
+all_shortest_paths = dict(nx.all_pairs_dijkstra_path(G))
+all_shortest_distances = dict(nx.all_pairs_dijkstra_path_length(G))
 
-print("Shortest paths:")
-for target, path in shortest_paths.items():
-    print(f"{target}: {path}")
-
-print("\nShortest path lengths:")
-for target, length in shortest_path_lengths.items():
-    print(f"{target}: {length}")
+# Display results
+for source in G.nodes:
+    print(f"\nFrom {source}:")
+    for target in G.nodes:
+        if source != target:
+            path = all_shortest_paths[source][target]
+            distance = all_shortest_distances[source][target]
+            print(f"  To {target} → Path: {path}, Distance: {distance}")
