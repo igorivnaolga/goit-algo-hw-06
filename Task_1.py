@@ -49,7 +49,7 @@ plt.title("South Island NZ Road Network")
 plt.axis("off")
 plt.show()
 
-# Analyses
+# Analysis
 print(f"Number of nodes: {G.number_of_nodes()}")
 print(f"Number of edges: {G.number_of_edges()}")
 
