@@ -1,35 +1,75 @@
-import networkx as nx
+graph = {
+    "Christchurch": {"Dunedin": 361, "Kaikoura": 183, "Nelson": 417, "Queenstown": 487, "Wanaka": 428},
+    "Dunedin": {"Christchurch": 361, "Kaikoura": 545, "Nelson": 790, "Queenstown": 281, "Wanaka": 276},
+    "Kaikoura": {"Christchurch": 183, "Dunedin": 545, "Nelson": 245, "Queenstown": 669, "Wanaka": 607},
+    "Nelson": {"Christchurch": 417, "Dunedin": 790, "Kaikoura": 245, "Queenstown": 850, "Wanaka": 809},
+    "Wanaka": {"Christchurch": 428, "Dunedin": 276, "Kaikoura": 607, "Nelson": 809, "Queenstown": 117},
+    "Queenstown": {"Christchurch": 487, "Dunedin": 281, "Kaikoura": 669, "Nelson": 850, "Wanaka": 117},
+}
 
-# Graph setup
-G = nx.Graph()
-nodes = ["Christchurch", "Dunedin", "Kaikoura", "Nelson", "Wanaka", "Queenstown"]
-G.add_nodes_from(nodes)
-G.add_edges_from([
-    ("Christchurch", "Dunedin", {"weight": 361}),
-    ("Christchurch", "Kaikoura", {"weight": 183}),
-    ("Christchurch", "Nelson", {"weight": 417}),
-    ("Christchurch", "Queenstown", {"weight": 487}),
-    ("Christchurch", "Wanaka", {"weight": 428}),
-    ("Dunedin", "Kaikoura", {"weight": 545}),
-    ("Dunedin", "Nelson", {"weight": 790}),
-    ("Dunedin", "Queenstown", {"weight": 281}),
-    ("Dunedin", "Wanaka", {"weight": 276}),
-    ("Kaikoura", "Nelson", {"weight": 245}),
-    ("Kaikoura", "Queenstown", {"weight": 669}),
-    ("Kaikoura", "Wanaka", {"weight": 607}),
-    ("Nelson", "Queenstown", {"weight": 850}),
-    ("Nelson", "Wanaka", {"weight": 809}),
-    ("Queenstown", "Wanaka", {"weight": 117}),
-])
+# Custom Dijkstra
+def dijkstra(graph, start):
+    distances = {vertex: float('infinity') for vertex in graph}
+    distances[start] = 0
+    unvisited = list(graph.keys())
 
-# Calculate shortest paths and distances using Dijkstra
-all_shortest_paths = dict(nx.all_pairs_dijkstra_path(G))
-all_shortest_distances = dict(nx.all_pairs_dijkstra_path_length(G))
+    while unvisited:
+        current_vertex = min(unvisited, key=lambda vertex: distances[vertex])
 
-# Display results
-for source in G.nodes:
+        if distances[current_vertex] == float('infinity'):
+            break
+
+        for neighbor, weight in graph[current_vertex].items():
+            distance = distances[current_vertex] + weight
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+
+        unvisited.remove(current_vertex)
+
+    return distances
+
+# Path reconstruction
+def reconstruct_path(graph, start, end):
+    distances = {vertex: float('infinity') for vertex in graph}
+    previous = {vertex: None for vertex in graph}
+    distances[start] = 0
+    unvisited = list(graph.keys())
+
+    while unvisited:
+        current_vertex = min(unvisited, key=lambda vertex: distances[vertex])
+
+        if distances[current_vertex] == float('infinity'):
+            break
+
+        for neighbor, weight in graph[current_vertex].items():
+            distance = distances[current_vertex] + weight
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+                previous[neighbor] = current_vertex
+
+        unvisited.remove(current_vertex)
+
+    # Build path
+    path = []
+    current = end
+    while current is not None:
+        path.append(current)
+        current = previous[current]
+    path.reverse()
+
+    return path
+
+# Calculate and display
+all_shortest_distances = {}
+all_shortest_paths = {}
+
+for source in graph:
+    all_shortest_distances[source] = dijkstra(graph, source)
+    all_shortest_paths[source] = {target: reconstruct_path(graph, source, target) for target in graph}
+
+for source in graph:
     print(f"\nFrom {source}:")
-    for target in G.nodes:
+    for target in graph:
         if source != target:
             path = all_shortest_paths[source][target]
             distance = all_shortest_distances[source][target]

@@ -27,15 +27,11 @@ G.add_edges_from([
     ("Queenstown", "Wanaka", {"weight": 117}),
 ])
 
-pos = nx.circular_layout(G)  
-weights = [G[u][v]['weight'] for u, v in G.edges()] 
-
-plt.figure(figsize=(12, 9))  
+pos = nx.kamada_kawai_layout(G, weight = "weight")  
 
 # Draw graph with styles
 nx.draw(G, pos, with_labels=True,
         node_color='lightblue',
-        edge_color=weights,
         width=2,
         edge_cmap=plt.cm.Blues,
         node_size=2500,
